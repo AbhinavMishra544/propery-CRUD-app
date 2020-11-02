@@ -1,4 +1,4 @@
-# clone backend from https://github.com/AbhinavMishra544/property-backend (To USE API HOOKED IN THIS API)
+# clone backend from https://github.com/AbhinavMishra544/property-backend (To USE API HOOKED IN THIS APP)
 
 # Getting Started with Create React App
 
