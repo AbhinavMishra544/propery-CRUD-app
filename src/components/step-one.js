@@ -235,7 +235,7 @@ class StepOne extends React.Component {
         if (buttonRef.current) {
           buttonRef.current.open(e)
         }
-      }
+    }
      
     handleOnFileLoad = (data) => {
         if(data){

@@ -73,7 +73,7 @@ class PropertyList extends React.Component {
         let cellIndexTemp = null;
         return (
           <tr key={rowIndex}>
-            {Object.values(row).slice(1,5).map((cell, cellIndex) => {
+            {Object.values(row).slice(0,4).map((cell, cellIndex) => {
                 cellIndexTemp = cellIndex;
               return (
                 <Cell
