@@ -12,7 +12,7 @@ class StepThree extends React.Component {
 
     handleSubmit = (files, allFiles) => {
         this.props.history.push('/property-list')
-        allFiles.forEach(f => f.remove())
+        
     }
     
     formDetails = () => {

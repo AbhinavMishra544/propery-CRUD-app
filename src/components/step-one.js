@@ -2,7 +2,7 @@ import React from 'react';
 import Step from './step.js';
 import { Link } from 'react-router-dom';
 import { CSVReader } from 'react-papaparse'
- 
+import axios from 'axios';
 const buttonRef = React.createRef()
 class StepOne extends React.Component {
     constructor(props) {
@@ -22,11 +22,30 @@ class StepOne extends React.Component {
 		let state = this.state;
         state[name] = value
         this.setState({...state})
-        console.log(name, value,"name, value");
+    }
+
+    addProperty = (propertyDetails) => {
+        axios({
+            method: 'POST',
+            url: 'http://localhost:3000/addproperty',
+            data : propertyDetails,
+            headers: {
+                'Access-Control-Allow-Origin' : '*',
+                'Access-Control-Allow-Methods':'GET,PUT,POST,DELETE,PATCH,OPTIONS',   
+            }
+        })
+        .then((res) => {
+            console.log(res,"res------------");
+            if(res.status == 200){
+                this.props.history.push(`/step-three`);
+            }
+        }).
+        catch((error)=>{
+            console.log(error,"error---------------");
+        });
     }
     
     submitValue = (e) => {
-        console.log("submit clicled");
         const { name, value } = e.target;
         if(name == 'addfromscratch') {
             this.setState({
@@ -40,7 +59,13 @@ class StepOne extends React.Component {
             if(this.state.address && this.state.bathroom && this.state.bedroom){
                 let pattern = /^\d+$/;
                 if(pattern.test(this.state.bathroom + this.state.bedroom)) {
+                    const reqBody = {
+                        address : this.state.address,
+                        description : this.state.description
+                    };
+
                     if(this.state.bathroom.length > 0 && this.state.bathroom.length <= 5){
+                        reqBody["bathroom"] = this.state.bathroom;
                         this.setState({
                             error: ""
                         })
@@ -51,6 +76,7 @@ class StepOne extends React.Component {
                         }) 
                     }
                     if(this.state.bedroom.length > 0 && this.state.bedroom.length <= 10){
+                        reqBody["bathroom"] = this.state.bedroom;
                         this.setState({
                             error: ""
                         }) 
@@ -61,8 +87,7 @@ class StepOne extends React.Component {
                         }) 
                     }
                     if(this.state.error == ''){
-                        console.log(this.state.error,"last if");
-                        this.props.history.push(`/step-three`);
+                        this.addProperty(reqBody)
                     }
                     } else{
                     this.setState({
@@ -71,7 +96,6 @@ class StepOne extends React.Component {
                     }) 
                 }
             } else{
-                console.log("else");
                 this.setState({
                     error:"Please fill out required(*) fields",
                     loading : false
@@ -88,7 +112,7 @@ class StepOne extends React.Component {
     }
     renderStepTwo = ( ) => {
         return (
-            <> {console.log(this.state,"statwe step two ")}
+            <> 
             <div className="page">
             <button style={{"backgroundColor":"#d33f8d"}} onClick={(e) => this.handleGoBack(e)}><i className="fas fa-long-arrow-alt-left">&nbsp;Go Back</i></button>
                 <div className="title">Contact Info:</div>
@@ -213,50 +237,46 @@ class StepOne extends React.Component {
         }
       }
      
-      handleOnFileLoad = (data) => {
-        console.log('redaing ---------------------------')
-        console.log(data)
-        console.log('---------------------------')
-          if(data){
-            const csvIndexOneData = data[1] && data[1].data && data[1].data.slice(1,5);
-            console.log(csvIndexOneData,"csvIndexOneData");
-            let pattern = /^\d+$/;
-            if(!pattern.test((csvIndexOneData && csvIndexOneData[1]) + (csvIndexOneData && csvIndexOneData[2]))) {
-                this.setState({
-                    error:"bathroom and bedroom values cannot be empty",
-                    address : csvIndexOneData && csvIndexOneData[0],
-                    description : csvIndexOneData && csvIndexOneData[3],
-                    stepOneLoaded : false,
-                    loading : false
-                }) 
-            }
-            else{
-                this.setState({
-                    address : csvIndexOneData && csvIndexOneData[0],
-                    bedroom : csvIndexOneData && csvIndexOneData[1],
-                    bathroom : csvIndexOneData && csvIndexOneData[2],
-                    description : csvIndexOneData && csvIndexOneData[3],
-                    stepOneLoaded : false
-                });
-            }
-          }
-      }
-     
-      handleOnError = (err, file, inputElem, reason) => {
-        console.log(err)
-      }
-     
-      handleOnRemoveFile = (data) => {
-        console.log('---------------------------')
-        console.log(data)
-        console.log('---------------------------')
-      }
-     
-      handleRemoveFile = (e) => {
-        if (buttonRef.current) {
-          buttonRef.current.removeFile(e)
+    handleOnFileLoad = (data) => {
+        if(data){
+        const csvIndexOneData = data[1] && data[1].data && data[1].data.slice(1,5);
+        let pattern = /^\d+$/;
+        if(!pattern.test((csvIndexOneData && csvIndexOneData[1]) + (csvIndexOneData && csvIndexOneData[2]))) {
+            this.setState({
+                error:"bathroom and bedroom values cannot be empty",
+                address : csvIndexOneData && csvIndexOneData[0],
+                description : csvIndexOneData && csvIndexOneData[3],
+                stepOneLoaded : false,
+                loading : false
+            }) 
         }
-      }
+        else{
+            this.setState({
+                address : csvIndexOneData && csvIndexOneData[0],
+                bedroom : csvIndexOneData && csvIndexOneData[1],
+                bathroom : csvIndexOneData && csvIndexOneData[2],
+                description : csvIndexOneData && csvIndexOneData[3],
+                stepOneLoaded : false
+            });
+        }
+        }
+    }
+    
+    handleOnError = (err, file, inputElem, reason) => {
+    console.log(err)
+    }
+    
+    handleOnRemoveFile = (data) => {
+    console.log('---------------------------')
+    console.log(data)
+    console.log('---------------------------')
+    }
+    
+    handleRemoveFile = (e) => {
+    if (buttonRef.current) {
+        buttonRef.current.removeFile(e)
+    }
+    }
 
     //csv functions ended
     render() {
@@ -270,8 +290,6 @@ class StepOne extends React.Component {
                         :
                         <Step heading={"Fill Form Details"} formDetails={this.renderStepTwo()}  loading = {this.state.loading} stepValue={2}/>
                 }
-                
-                
             </>
         )
     }
